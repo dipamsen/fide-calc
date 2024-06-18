@@ -1,10 +1,13 @@
 import {
   Box,
   Container,
+  FormControl,
   IconButton,
   Link,
+  MenuItem,
   Modal,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -15,8 +18,9 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getDP } from "./utils/p-dp";
 import InfoIcon from "@mui/icons-material/Info";
+import { getDP } from "./utils/p-dp";
+import { getPD } from "./utils/d-pd";
 
 interface PlayerData {
   playerInfo: {
@@ -37,6 +41,8 @@ interface PlayerData {
 
 function Calculations({ data }: { data: PlayerData }) {
   const [unratedModal, setUnratedModal] = useState(false);
+  const [ratedModal, setRatedModal] = useState(false);
+  const [kValue, setKValue] = useState(40);
 
   let playerStatus = data.playerInfo.rating === 0 ? "Unrated" : "Rated";
   let isRated = playerStatus === "Rated";
@@ -73,6 +79,8 @@ function Calculations({ data }: { data: PlayerData }) {
     },
   };
 
+  let ratingChanges: number[] = [];
+
   let text82 = `8.2     Determining the initial rating 'Ru' of a player.
 
 8.2.1      If an unrated player scores zero in their first event this score is disregarded. Otherwise, their rating is calculated using all their results as in 7.1.4.
@@ -98,9 +106,121 @@ The maximum initial rating is 2200.
       >
         {isRated ? (
           <>
-            <Typography variant="body2">
-              Rating change calculations for rated players is not yet supported.
-            </Typography>
+            <Box
+              display={"flex"}
+              justifyContent={"space-between"}
+              alignItems={"center"}
+            >
+              <Typography variant="h4">Rating Change Calculation</Typography>
+              <IconButton onClick={() => setRatedModal(true)}>
+                <InfoIcon />
+              </IconButton>
+            </Box>
+
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              marginTop={"20px"}
+              gap="20px"
+            >
+              Use K Value:
+              <FormControl variant="standard">
+                {/* <InputLabel id="klabel">K value</InputLabel> */}
+                <Select
+                  labelId="klabel"
+                  value={kValue}
+                  onChange={(e) => setKValue(+e.target.value)}
+                >
+                  <MenuItem value={40}>40</MenuItem>
+                  <MenuItem value={30}>30</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                  <MenuItem value={15}>15</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Modal open={ratedModal} onClose={() => setRatedModal(false)}>
+              <Box sx={modalStyle}>
+                <Typography variant="h4">How does this work?</Typography>
+                <Typography variant="body2">
+                  According to{" "}
+                  <Link href="https://handbook.fide.com/chapter/B022024">
+                    FIDE Rating Regulations effective from 1 March 2024
+                  </Link>
+                  , the procedure for calculation of rating change for a rated
+                  game is as follows:
+                </Typography>
+                <img src="/img/fide71.png" alt={"Official FIDE Rating List"} />
+                <img
+                  src="/img/fide83.png"
+                  alt={"Determining the rating change for a rated player"}
+                />
+                Table for conversion of rating difference 'D', to scoring
+                probability 'PD':
+                <img
+                  src="/img/pdtable.png"
+                  alt="8.1.2 The table of conversion from rating difference, D, into scoring probability, PD"
+                />
+              </Box>
+            </Modal>
+            <Box width="100%" sx={{ "& pre": { whiteSpace: "pre-wrap" } }}>
+              <pre>
+                Change in rating = Sigma Delta R * K<br />
+                where Delta R = score - PD.
+                <br />
+                PD is the probability of a win, as per table 8.1.2 from the FIDE
+                Rating Regulations.
+              </pre>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Round</TableCell>
+                    <TableCell>Opponent Rating</TableCell>
+                    <TableCell>Score</TableCell>
+                    <TableCell>Rating Difference</TableCell>
+                    <TableCell>PD</TableCell>
+                    <TableCell>Rtg change</TableCell>
+                    <TableCell>K × Rtg change</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {ratedGames.map((game) => {
+                    const ratingDiff = data.playerInfo.rating - game.rating;
+                    const PD = getPD(ratingDiff);
+                    const deltaR = game.result - PD;
+                    const kdeltaR = kValue * deltaR;
+                    ratingChanges.push(kdeltaR);
+                    return (
+                      <TableRow key={game.round}>
+                        <TableCell>{game.round}</TableCell>
+                        <TableCell>{game.rating}</TableCell>
+                        <TableCell>{game.result}</TableCell>
+                        <TableCell>{ratingDiff}</TableCell>
+                        <TableCell>{PD}</TableCell>
+                        <TableCell>{deltaR.toFixed(2)}</TableCell>
+                        <TableCell>{kdeltaR.toFixed(2)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+
+              {(() => {
+                const totalRtgChange = ratingChanges.reduce(
+                  (acc, val) => acc + val,
+                  0
+                );
+                return (
+                  <pre>
+                    Total rating change = {totalRtgChange.toFixed(2)}
+                    <br />
+                    New rating ={" "}
+                    {(data.playerInfo.rating + totalRtgChange).toFixed(0)}
+                  </pre>
+                );
+              })()}
+            </Box>
           </>
         ) : (
           <>
@@ -202,6 +322,7 @@ The maximum initial rating is 2200.
 function TournamentPlayer() {
   const { tid, id } = useParams();
   const [data, setData] = useState<PlayerData>();
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
     async function getData() {
@@ -212,6 +333,10 @@ function TournamentPlayer() {
       url += `/api/tournament-player?tid=${tid}&pid=${id}`;
 
       const response = await fetch(url);
+      if (!response.ok) {
+        setError(await response.text());
+        return;
+      }
       const data = await response.json();
       setData(data);
       console.log(data);
@@ -268,6 +393,17 @@ function TournamentPlayer() {
           {/* Calculations... */}
           <Calculations data={data} />
         </>
+      ) : error ? (
+        <Box
+          sx={{ marginTop: "20px" }}
+          bgcolor={"red"}
+          borderRadius={"10px"}
+          padding={"20px"}
+        >
+          <Typography variant="h5" color={"black"} fontWeight={"bold"}>
+            Error: {error}
+          </Typography>
+        </Box>
       ) : (
         <Typography variant="body1">Loading...</Typography>
       )}

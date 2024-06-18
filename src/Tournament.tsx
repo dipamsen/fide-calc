@@ -60,7 +60,9 @@ function Tournament() {
 
       {data ? (
         <>
-          <Typography variant="h4">{data.title}</Typography>
+          <Typography variant="h4" sx={{ wordWrap: "break-word" }}>
+            {data.title}
+          </Typography>
 
           {/* input box to enter name of player with rich autocompletion/dropdown */}
           <Box sx={{ display: "flex", flexDirection: "column" }}>
