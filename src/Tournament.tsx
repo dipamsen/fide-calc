@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  Link,
   TextField,
   Typography,
 } from "@mui/material";
@@ -23,6 +24,7 @@ function Tournament() {
     }[];
   }>();
   const [player, setPlayer] = useState<number>();
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
     async function getData() {
@@ -33,6 +35,10 @@ function Tournament() {
       url += `/api/tournament?id=${tid}`;
 
       const response = await fetch(url);
+      if (!response.ok) {
+        setError(await response.text());
+        return;
+      }
       const data = await response.json();
       setData(data);
       console.log(data);
@@ -44,7 +50,13 @@ function Tournament() {
     <Container maxWidth="md" sx={{ marginTop: "20px", flex: 1 }}>
       <Typography variant="h3">FIDE Rating Calculations</Typography>
 
-      <Box sx={{ height: 20 }}></Box>
+      <Box sx={{ height: 10 }}></Box>
+
+      <Link href="/">
+        <Typography variant="body1">Back to home</Typography>
+      </Link>
+
+      <Box sx={{ height: 10 }}></Box>
 
       {data ? (
         <>
@@ -93,6 +105,17 @@ function Tournament() {
             </Button>
           </Box>
         </>
+      ) : error ? (
+        <Box
+          sx={{ marginTop: "20px" }}
+          bgcolor={"red"}
+          borderRadius={"10px"}
+          padding={"20px"}
+        >
+          <Typography variant="h5" color={"black"} fontWeight={"bold"}>
+            Error: {error}
+          </Typography>
+        </Box>
       ) : (
         <Typography variant="body1">Loading...</Typography>
       )}

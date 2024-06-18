@@ -41,6 +41,7 @@ function Calculations({ data }: { data: PlayerData }) {
   let playerStatus = data.playerInfo.rating === 0 ? "Unrated" : "Rated";
   let isRated = playerStatus === "Rated";
 
+  // Unrated
   let ratedGames = data.games.filter((game) => game.rating !== 0);
   let avgOpp =
     (ratedGames.reduce((acc, game) => acc + game.rating, 0) + 1800 + 1800) /
@@ -51,12 +52,14 @@ function Calculations({ data }: { data: PlayerData }) {
   let dp = getDP(p);
 
   let rating = avgOpp + dp;
+
   const modalStyle = {
     position: "absolute" as "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    minWidth: "60%",
+    maxWidth: "800px",
+    width: "90%",
     bgcolor: "background.paper",
     border: "2px solid #000",
     boxShadow: 24,
@@ -65,7 +68,7 @@ function Calculations({ data }: { data: PlayerData }) {
     p: 4,
     "& img": {
       display: "block",
-      width: "80%",
+      width: "100%",
       margin: "20px 0",
     },
   };
@@ -138,54 +141,57 @@ The maximum initial rating is 2200.
               </Box>
             </Modal>
 
-            <pre>
-              Number of rated games: {ratedGames.length}
-              <br />
-              Points scored in rated games:{" "}
-              {ratedGames.reduce((acc, game) => acc + game.result, 0)}
-            </pre>
-            {ratedGames.length >= 5 ? (
-              ratedPts > 0 ? (
-                <pre>
-                  Consider two more hypothetical games with rating of 1800 and
-                  result draw.
-                  <br />
-                  Rating average of opponents:
-                  <br />
-                  {ratedGames.map((game) => game.rating).join(", ")}, 1800, 1800
-                  <br />
-                  Average (Ra) = {avgOpp.toFixed(2)}
-                  <br />
-                  <br />
-                  Points scored: {ratedPts + 1}
-                  <br />
-                  Out of: {ratedGames.length + 2}
-                  <br /> <br />
-                  Fractional Score (p) = {p.toFixed(2)}
-                  <br />
-                  Corresponding dp = {dp}
-                  <br />
-                  <br />
-                  Ru = Ra + dp
-                  <br />
-                  Ru = {avgOpp.toFixed(2)} + ({dp})
-                  <br />
-                  Ru = {(avgOpp + dp).toFixed(2)}
-                  <br />
-                  Initial Rating = {rating.toFixed(0)}
-                </pre>
+            <Box width="100%" sx={{ "& pre": { whiteSpace: "pre-wrap" } }}>
+              <pre>
+                Number of rated games: {ratedGames.length}
+                <br />
+                Points scored in rated games:{" "}
+                {ratedGames.reduce((acc, game) => acc + game.result, 0)}
+              </pre>
+              {ratedGames.length >= 5 ? (
+                ratedPts > 0 ? (
+                  <pre>
+                    Consider two more hypothetical games with rating of 1800 and
+                    result draw.
+                    <br />
+                    Rating average of opponents:
+                    <br />
+                    {ratedGames.map((game) => game.rating).join(", ")}, 1800,
+                    1800
+                    <br />
+                    Average (Ra) = {avgOpp.toFixed(2)}
+                    <br />
+                    <br />
+                    Points scored: {ratedPts + 1}
+                    <br />
+                    Out of: {ratedGames.length + 2}
+                    <br /> <br />
+                    Fractional Score (p) = {p.toFixed(2)}
+                    <br />
+                    Corresponding dp = {dp}
+                    <br />
+                    <br />
+                    Ru = Ra + dp
+                    <br />
+                    Ru = {avgOpp.toFixed(2)} + ({dp})
+                    <br />
+                    Ru = {(avgOpp + dp).toFixed(2)}
+                    <br />
+                    Initial Rating = {rating.toFixed(0)}
+                  </pre>
+                ) : (
+                  <pre>
+                    No points scored in rated games, player does not get an
+                    initial rating.
+                  </pre>
+                )
               ) : (
                 <pre>
-                  No points scored in rated games, player does not get an
-                  initial rating.
+                  Less than 5 rated games played, player needs to play more
+                  rated games to get an initial rating.
                 </pre>
-              )
-            ) : (
-              <pre>
-                Less than 5 rated games played, player needs to play more rated
-                games to get an initial rating.
-              </pre>
-            )}
+              )}
+            </Box>
           </>
         )}
       </Box>
@@ -225,7 +231,9 @@ function TournamentPlayer() {
       {data ? (
         <>
           <Typography variant="h4">{data.playerInfo.name}</Typography>
-          <Typography variant="h5">{data.playerInfo.tournament}</Typography>
+          <Typography variant="h5" sx={{ wordWrap: "break-word" }}>
+            {data.playerInfo.tournament}
+          </Typography>
           <Typography variant="subtitle1">
             {playerStatus} {isRated && <>({data.playerInfo.rating})</>}
           </Typography>
