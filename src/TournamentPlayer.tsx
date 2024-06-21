@@ -17,7 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import InfoIcon from "@mui/icons-material/Info";
 import { getDP } from "./utils/p-dp";
 import { getPD } from "./utils/d-pd";
@@ -43,9 +43,15 @@ function Calculations({ data }: { data: PlayerData }) {
   const [unratedModal, setUnratedModal] = useState(false);
   const [ratedModal, setRatedModal] = useState(false);
   const [kValue, setKValue] = useState(40);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  let useRating = searchParams.get("useRating");
 
   let playerStatus = data.playerInfo.rating === 0 ? "Unrated" : "Rated";
-  let isRated = playerStatus === "Rated";
+  let isRated = playerStatus === "Rated" || useRating;
+  if (useRating) {
+    data.playerInfo.rating = +useRating;
+  }
 
   // Unrated
   let ratedGames = data.games.filter((game) => game.rating !== 0);
