@@ -36,6 +36,7 @@ interface PlayerData {
     opponent: string;
     rating: number;
     result: number;
+    bye: boolean;
   }[];
 }
 
@@ -54,7 +55,7 @@ function Calculations({ data }: { data: PlayerData }) {
   }
 
   // Unrated
-  let ratedGames = data.games.filter((game) => game.rating !== 0);
+  let ratedGames = data.games.filter((game) => game.rating !== 0 && !game.bye);
   let avgOpp =
     (ratedGames.reduce((acc, game) => acc + game.rating, 0) + 1800 + 1800) /
     (ratedGames.length + 2);
@@ -388,7 +389,9 @@ function TournamentPlayer() {
                     <TableCell>{game.round}</TableCell>
                     <TableCell>{game.opponent}</TableCell>
                     <TableCell>{game.rating}</TableCell>
-                    <TableCell>{game.result}</TableCell>
+                    <TableCell>
+                      {game.result} {game.bye ? "(Bye)" : ""}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

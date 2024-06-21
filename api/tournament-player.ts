@@ -45,12 +45,18 @@ export async function GET(request: Request) {
   const playerGames = games
     .map((i, el) => {
       const tds = $(el).find("td");
-      const result = tds.eq(-1).text().trim();
+      let bye = false;
+      let result = tds.eq(-1).text().trim();
+      if (result.startsWith("-")) {
+        result = result.substring(1).trim()[0];
+        bye = true;
+      }
       return {
         round: +tds.eq(0).text(),
         opponent: tds.eq(4).text().trim(),
         rating: +tds.eq(5).text(),
         result: result === "½" ? 0.5 : +result,
+        bye,
       };
     })
     .get()
