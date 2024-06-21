@@ -43,7 +43,7 @@ function Calculations({ data }: { data: PlayerData }) {
   const [unratedModal, setUnratedModal] = useState(false);
   const [ratedModal, setRatedModal] = useState(false);
   const [kValue, setKValue] = useState(40);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   let useRating = searchParams.get("useRating");
 
