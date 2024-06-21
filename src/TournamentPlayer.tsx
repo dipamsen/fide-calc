@@ -202,7 +202,7 @@ The maximum initial rating is 2200.
                         <TableCell>{game.round}</TableCell>
                         <TableCell>{game.rating}</TableCell>
                         <TableCell>{game.result}</TableCell>
-                        <TableCell>{ratingDiff}</TableCell>
+                        <TableCell>{-ratingDiff}</TableCell>
                         <TableCell>{PD.toFixed(2)}</TableCell>
                         <TableCell>{deltaR.toFixed(2)}</TableCell>
                         <TableCell>{kdeltaR.toFixed(2)}</TableCell>
