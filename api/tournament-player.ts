@@ -19,12 +19,6 @@ export async function GET(request: Request) {
   const html = await res.text();
   const $ = cheerio.load(html);
 
-  //  first table with class "CRs1" contains player info
-  // (each row has two columns, first column is the field name, second column is the value)
-  //   rows are: Name, Starting Rank, Rating, Rating Nat, Rating INT, PerfRating, RatingChange (?), Pts, rank, federation, ident number, fide id, year of birth
-  // (here rating change row may or may not be present)
-  // we need: name, rating, rank, fide id
-
   //   second table with class "CRs1" contains player's games
   // columns are: round, board, srno, title, opponent name, rating, fed, points, result
   // result column has points scored by player in that game, it may contain symbol ½ for draw which should be converted to 0.5
@@ -34,19 +28,39 @@ export async function GET(request: Request) {
   const rawInfo = $("table.CRs1").first().find("tr");
 
   const playerInfo = {
-    name: rawInfo.eq(0).find("td").eq(1).text().trim(),
-    rating: +rawInfo.eq(2).find("td").eq(1).text(),
-    rank: +rawInfo.eq(-6).find("td").eq(1).text(),
-    fideId: rawInfo.eq(-2).find("td").eq(1).text(),
+    name: "",
+    rating: 0,
+    rank: 0,
+    fideId: "",
   };
+  let clean = (str) => str.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  rawInfo.each((i, el) => {
+    const field = $(el).find("td").eq(0).text().trim().toLowerCase();
+    const value = $(el).find("td").eq(1).text().trim();
+    if (field.includes("name")) {
+      playerInfo.name = value;
+    } else if (clean(field) === "rating") {
+      playerInfo.rating = +value;
+    } else if (clean(field) === "rank") {
+      playerInfo.rank = +value;
+    } else if (field.includes("fideid")) {
+      playerInfo.fideId = value;
+    }
+  });
 
   // games
-  const games = $("table.CRs1").eq(1).find("tr");
+  let tbl = $("table.CRs1").eq(1);
+  const games = tbl.find("tr");
+  let ri = tbl
+    .find("th")
+    .toArray()
+    .findIndex((el) => clean($(el).text()) === "res");
   const playerGames = games
     .map((i, el) => {
       const tds = $(el).find("td");
+      if (tds.length < 6) return null;
       let bye = false;
-      let result = tds.eq(-1).text().trim();
+      let result = tds.eq(ri).text().trim();
       if (result.startsWith("-")) {
         result = result.substring(1).trim()[0];
         bye = true;

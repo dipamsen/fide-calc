@@ -1,4 +1,3 @@
-import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import {
   Box,
@@ -11,6 +10,8 @@ import {
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Tournament from "./Tournament.tsx";
 import TournamentPlayer from "./TournamentPlayer.tsx";
+import Calculator from "./Calculator.tsx";
+import * as ReactDOM from "react-dom/client";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
     path: "/swiss/:tid/player/:id",
     element: <TournamentPlayer />,
   },
+  {
+    path: "/calc",
+    element: <Calculator />,
+  },
 ]);
 
 const theme = createTheme({ palette: { mode: "dark" } });
@@ -34,7 +39,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
     <RouterProvider router={router} />
-    {/* footer (created by dipamsen) */}
     <Box sx={{ marginTop: "20px", backgroundColor: "#242424", py: "10px" }}>
       <Typography variant="subtitle1" align="center">
         created by{" "}
