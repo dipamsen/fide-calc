@@ -38,7 +38,7 @@ function App() {
       <Box sx={{ height: 20 }}></Box>
 
       {/* Initial Rating */}
-      <Typography variant="h6">Initial Rating</Typography>
+      <Typography variant="h6">Initial Rating Calculator</Typography>
       <Box
         sx={{
           display: "flex",

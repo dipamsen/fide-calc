@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const $ = cheerio.load(html);
 
   const ths = $(".CRs1 tr th");
-  const columns = {};
+  const columns: Record<string, number> = {};
   ths.each((i, el) => {
     // remove non-alphabets and convert to lowercase
     const text = $(el)
@@ -34,11 +34,10 @@ export async function GET(request: Request) {
       .replace(/[^a-z]/g, "");
     columns[text] = i;
   });
-  console.log(columns);
 
   const title = $("h2").first().text();
   const players = $(".CRs1 tr")
-    .map((i, el) => {
+    .map((_, el) => {
       const tds = $(el).find("td");
       const link = tds.eq(columns["name"]).find("a").attr("href");
 

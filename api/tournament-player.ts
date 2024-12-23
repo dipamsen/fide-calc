@@ -33,8 +33,8 @@ export async function GET(request: Request) {
     rank: 0,
     fideId: "",
   };
-  let clean = (str) => str.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-  rawInfo.each((i, el) => {
+  let clean = (str: string) => str.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  rawInfo.each((_, el) => {
     const field = $(el).find("td").eq(0).text().trim().toLowerCase();
     const value = $(el).find("td").eq(1).text().trim();
     if (field.includes("name")) {
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     .toArray()
     .findIndex((el) => clean($(el).text()) === "res");
   const playerGames = games
-    .map((i, el) => {
+    .map((_, el) => {
       const tds = $(el).find("td");
       if (tds.length < 6) return null;
       let bye = false;

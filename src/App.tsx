@@ -1,5 +1,7 @@
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import "./index.css";
 
 function App() {
   const [tournamentId, setTournamentId] = useState<string>();
@@ -33,6 +35,12 @@ function App() {
         >
           Go
         </Button>
+
+        <Box sx={{ height: 20 }}></Box>
+
+        <Typography variant="body2">
+          Check out the Initial Rating Calculator <Link to="/calc">here</Link>.
+        </Typography>
         {/* </FormControl> */}
       </Box>
     </Container>
