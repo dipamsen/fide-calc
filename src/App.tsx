@@ -4,7 +4,19 @@ import { Link } from "react-router-dom";
 import "./index.css";
 
 function App() {
-  const [tournamentId, setTournamentId] = useState<string>();
+  const [url, setUrl] = useState<string>();
+
+  function handle(value: string) {
+    if (value.includes("chess-results.com")) {
+      const url = new URL(value);
+      const id = url.pathname.split(".")[0].slice(1);
+      return id;
+    }
+    return value;
+  }
+
+  const tournamentId = handle(url ?? "");
+  console.log(tournamentId);
 
   return (
     <Container maxWidth="md" sx={{ marginTop: "20px", flex: 1 }}>
@@ -21,12 +33,12 @@ function App() {
         {/* <FormControl fullWidth> */}
         {/* enter tournament id/link */}
         <TextField
-          label="Tournament ID"
+          label="Tournament ID/URL"
           variant="outlined"
           margin="normal"
           fullWidth
-          value={tournamentId}
-          onChange={(e) => setTournamentId(e.target.value)}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
         />
         <Button
           variant="contained"

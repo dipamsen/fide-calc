@@ -24,6 +24,10 @@ function App() {
       ? "Minimum 5 rated games required"
       : rtgAvg < 1400
       ? "Rating Average should be greater than 1400"
+      : score < 0 || score > numRated
+      ? "Invalid Score"
+      : score == 0
+      ? "Rating is not obtained for 0 score"
       : "";
 
   return (
